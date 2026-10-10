@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6df6">
+<title>통합사회 만점 독학</title>
+<link rel="stylesheet" href="app/styles.css?v=55">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>📘</text></svg>">
+</head>
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+/* 입력창 안에서는 글자 선택을 허용한다 — 위 body의 onselectstart 차단에서만 빼 준다.
+   캡처 단계에서 전파를 끊으므로 body의 차단 핸들러까지 가지 않는다. */
+document.addEventListener('selectstart', function (e) {
+  var t = e.target;
+  if (t && t.closest && t.closest('input, textarea, [contenteditable]')) e.stopPropagation();
+}, true);
+</script>
+
+<!-- 콘텐츠 -->
+<script src="data/units.js?v=55"></script>
+<script src="data/concepts-book1.js?v=55"></script>
+<script src="data/concepts-book2.js?v=55"></script>
+<script src="data/pairs.js?v=55"></script>
+<script src="data/cases.js?v=55"></script>
+<script src="data/datasets.js?v=55"></script>
+<script src="data/questions.js?v=55"></script>
+<script src="data/comics.js?v=55"></script>
+
+<!-- 프로그램 -->
+<script src="app/store.js?v=55"></script>
+<script src="app/engine.js?v=55"></script>
+<script src="app/art.js?v=55"></script>
+<script src="app/art-concepts.js?v=55"></script>
+<script src="app/figures.js?v=55"></script>
+<script src="app/dataviews.js?v=55"></script>
+<script src="app/comic-art.js?v=55"></script>
+<script src="app/comic.js?v=55"></script>
+<script src="app/learn.js?v=55"></script>
+<script src="app/play.js?v=55"></script>
+<script src="app/ui.js?v=55"></script>
+</body>
+</html>
