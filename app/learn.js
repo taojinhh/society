@@ -143,8 +143,11 @@
 
     /* 2단계 — 확인 문제 */
     function startQuiz() {
-      quiz = [App.genInstant(cid)];
-      quiz.push(App.casesOf(cid).length ? App.genCase(cid) : App.genInstant(cid));
+      /* 사례가 없는 개념은 즉답 문항을 두 번 내므로, 형식을 서로 다르게 지정해
+         같은 문제가 두 번 나오지 않게 한다. */
+      var f0 = Math.random() < 0.6 ? 0 : 1;
+      quiz = [App.genInstant(cid, f0)];
+      quiz.push(App.casesOf(cid).length ? App.genCase(cid) : App.genInstant(cid, 1 - f0));
       qi = 0; wrong = 0;
       Store.addLearnTry(cid);
       askQ();

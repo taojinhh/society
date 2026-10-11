@@ -227,8 +227,29 @@
 
   /* ───────── 대비 드릴 (쌍당 5문항) ───────── */
   function viewDrill(pid) {
-    var p = App.pair(pid), items = [];
-    for (var i = 0; i < 5; i++) { var g = App.genContrast(pid); if (g) items.push(g); }
+    var p = App.pair(pid), items = [], seenQ = {}, guard = 0;
+    /* 같은 쌍에서 5문항을 뽑으므로 사례가 겹치지 않을 때만 담는다 */
+    while (items.length < 5 && guard++ < 40) {
+      var g = App.genContrast(pid);
+      if (!g) break;
+      var key = g.caseId || (g.q + '|' + g.ch.join('|'));
+      if (seenQ[key]) continue;
+      seenQ[key] = 1;
+      items.push(g);
+    }
+    /* 사례가 모자라면 그 쌍의 개념을 즉답 문항으로 채운다.
+       사례 문항과 발문 형식이 달라 서로 겹치지 않는다. */
+    if (items.length < 5) {
+      var refs = App.shuffle(((p && p.refs) || []).slice());
+      for (var ri = 0; ri < refs.length && items.length < 5; ri++) {
+        if (!App.concept(refs[ri])) continue;
+        var q2 = App.genInstant(refs[ri], 1);
+        var k2 = q2.q + '|' + q2.ch.join('|');
+        if (seenQ[k2]) continue;
+        seenQ[k2] = 1;
+        items.push(q2);
+      }
+    }
     if (!items.length) { toast('이 쌍은 사례 카드가 부족합니다.'); return go('#/compare/' + pid); }
     runner({
       title: p.title, back: '#/compare/' + pid, items: items, showCause: true,

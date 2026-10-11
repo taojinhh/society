@@ -86,10 +86,13 @@
     };
   }
 
-  /* ① 개념 즉답 퀴즈 — 용어 ↔ 뜻 (20초 제한) */
-  function genInstant(cid) {
+  /* ① 개념 즉답 퀴즈 — 용어 ↔ 뜻 (20초 제한)
+       form을 주면 그 형식으로 고정한다. 0 = 설명 보고 개념 고르기, 1 = 개념 보고 설명 고르기.
+       한 개념을 연달아 두 번 물을 때 같은 문제가 나오지 않도록 쓰는 값이다. */
+  function genInstant(cid, form) {
     var c = byId[cid];
-    if (Math.random() < 0.6) {
+    if (form == null) form = Math.random() < 0.6 ? 0 : 1;
+    if (form === 0) {
       return buildMC(cid, '다음 설명에 해당하는 개념은?\n\n"' + c.d + '"', '');
     }
     var wrong = distractors(cid, 3);
@@ -181,10 +184,18 @@
     var dq = shuffle(dataQuestions());
     var take = Math.min(rest, Math.max(2, Math.round(n * 0.16)), dq.length);
     for (var i = 0; i < take; i++) out.push(dq[i]);
-    while (out.length < n) {
-      var p = pick(window.PAIRS);
-      var g = genContrast(p.id);
-      if (g) out.push({ kind: 'inline', gen: g, u: p.u });
+    var ps = shuffle((window.PAIRS || []).slice());
+    for (var pi = 0; pi < ps.length && out.length < n; pi++) {
+      var g = genContrast(ps[pi].id);
+      if (g) out.push({ kind: 'inline', gen: g, u: ps[pi].u });
+    }
+    /* 그래도 모자라면 아직 안 쓴 은행 문항으로 채운다 */
+    if (out.length < n) {
+      var more = shuffle(bankQuestions(null)).filter(function (b) { return !usedBank[b.bi]; });
+      for (var mi = 0; mi < more.length && out.length < n; mi++) {
+        usedBank[more[mi].bi] = 1;
+        out.push(more[mi]);
+      }
     }
     return shuffle(out).slice(0, n);
   }
@@ -199,10 +210,18 @@
       if (g) out.push(g);
     });
     var cs = shuffle(conceptsOf(uid));
+    var usedC = {};
+    out.forEach(function (o) { if (o && o.c) usedC[o.c] = 1; });
     for (var i = 0; out.length < 5 && i < cs.length; i++) {
-      if (casesOf(cs[i].id).length) out.push(genCase(cs[i].id));
+      if (usedC[cs[i].id] || !casesOf(cs[i].id).length) continue;
+      usedC[cs[i].id] = 1;
+      out.push(genCase(cs[i].id));
     }
-    while (out.length < 5 && cs.length) out.push(genInstant(pick(cs).id));
+    for (var j = 0; out.length < 5 && j < cs.length; j++) {
+      if (usedC[cs[j].id]) continue;
+      usedC[cs[j].id] = 1;
+      out.push(genInstant(cs[j].id));
+    }
     return out.slice(0, 5);
   }
 
